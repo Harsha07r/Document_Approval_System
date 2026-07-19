@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  AUTHOR
+  REVIEWER
+  ADMIN
+  VIEWER
+}
+
+enum DocumentStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AuditAction {
+  CREATE
+  SUBMIT
+  APPROVE
+  REJECT
+  REVERT_TO_DRAFT
+  PUBLISH
+  ARCHIVE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      Role
+  createdAt DateTime @default(now())
+
+  sessions  Session[]
+  documents Document[] @relation("DocumentAuthor")
+  auditLogs AuditLog[] @relation("AuditActor")
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Document {
+  id      String         @id @default(cuid())
+  title   String
+  content String
+  status  DocumentStatus @default(DRAFT)
+  version Int            @default(1)
+
+  authorId String
+  author   User   @relation("DocumentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@index([status])
+  @@index([authorId])
+  @@map("documents")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  actorId String
+  actor   User   @relation("AuditActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  action     AuditAction
+  fromStatus DocumentStatus?
+  toStatus   DocumentStatus
+  metadata   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+  @@index([actorId])
+  @@map("audit_logs")
+}
