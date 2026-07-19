@@ -1,5 +1,11 @@
 # ElevateBox Document Approval
 
+## 🚀 Live Demo
+
+https://document-approval-system-gamma.vercel.app
+
+The application is fully deployed on Vercel and uses Supabase PostgreSQL as its database.
+
 A production-quality Document Approval Workflow system built to demonstrate clean architecture, server-side authorization (RBAC), a state-machine-driven workflow, database integrity, transactional audit logging, and optimistic concurrency control — deliberately with a minimal, unstyled-by-design UI, since the point of this project is the engineering underneath it, not the visual polish.
 
 ## Project Overview
@@ -14,7 +20,7 @@ Draft → Submitted → Approved → Published
 Draft, Submitted, Approved, Published → Archived (from any of the four)
 ```
 
-Every transition is validated server-side against a single source of truth (a transition table), gated by role- and ownership-aware authorization, protected against lost updates with optimistic concurrency (a `version` column), and recorded in an immutable audit trail — all inside the same database transaction as the state change itself.
+Every transition is validated server-side against a single source of truth (a transition table), gated by role- and ownership-aware authorization, protected against lost updates with optimistic concurrency (a `version` column), and recorded in an immutable audit trail — all inside the same database transaction as the state change itself. The application is fully deployed and can be evaluated without local setup using the live demo.
 
 ## Features
 
@@ -26,6 +32,25 @@ Every transition is validated server-side against a single source of truth (a tr
 - **Self-review prevention** — a Reviewer can never approve or reject a document they authored.
 - **Viewer visibility restriction** — Viewers can only see Published documents.
 - **Full frontend** — login, dashboard with live statistics, a filterable/searchable documents table, a document detail page with role- and status-aware action buttons, a chronological audit timeline, optimistic document creation, and conflict/validation/error toasts.
+
+## Quick Evaluation Guide
+
+Reviewers can evaluate the application using the following workflow:
+
+1. Login as Author
+2. Create a Draft document
+3. Edit the document
+4. Submit it for review
+5. Logout
+6. Login as Reviewer
+7. Approve the document
+8. Publish it
+9. Logout
+10. Login as Viewer
+11. Verify only Published documents are visible
+12. Login as Admin to archive documents if desired
+
+Every workflow transition along the way is recorded automatically in the Audit Timeline on the document's detail page.
 
 ## Architecture
 
@@ -151,6 +176,10 @@ This upserts four fixed accounts:
 | `admin@example.com` | Admin |
 | `viewer@example.com` | Viewer |
 
+No passwords are required.
+
+Simply click one of the seeded accounts on the login page to begin.
+
 ## Running Locally
 
 ```bash
@@ -158,6 +187,18 @@ npm run dev
 ```
 
 Open `http://localhost:3000` — you'll be redirected to `/login`, where each of the four accounts is a single-click card (no password).
+
+## Live Deployment
+
+A production deployment is available at:
+
+https://document-approval-system-gamma.vercel.app
+
+The deployed version uses:
+
+- Vercel
+- PostgreSQL (Supabase)
+- Prisma ORM
 
 ### Other scripts
 
@@ -169,6 +210,23 @@ npm run test           # run the Vitest suite once
 npm run test:watch     # Vitest in watch mode
 npm run prisma:studio  # Prisma Studio GUI
 ```
+
+## Engineering Highlights
+
+- Clean Layered Architecture
+- Repository Pattern
+- Service Layer
+- Role-Based Access Control (RBAC)
+- Workflow State Machine
+- Optimistic Concurrency Control
+- Transactional Audit Logging
+- Prisma ORM
+- PostgreSQL
+- Zod Validation
+- TanStack Query
+- React Hook Form
+- 125+ Vitest Tests
+- Responsive Next.js 15 App Router application
 
 ## API Endpoints
 
